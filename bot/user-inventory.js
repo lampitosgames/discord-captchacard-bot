@@ -1,24 +1,19 @@
-const invTypes = require('./inv-types.js');
+const User = require('./user.js');
 
-const userMap = {};
+let userMap = {};
 
 const getUser = (_userID) => {
-  if (!(_userID in Object.keys(userMap))) {
-    userMap[_userID] = {
-      id: _userID,
-      modus: invTypes.ARRAY,
-      inv: [],
-    };
+  if (!Object.keys(userMap).includes(_userID)) {
+    userMap[_userID] = new User(_userID);
   }
   return userMap[_userID];
 };
 
-const addCard = (_userID, _card) => {
-  if (!(_userID in Object.keys(userMap))) {
-    getUser(_userID);
-  }
-  userMap[_userID].inv.push(_card);
-  return userMap[_userID];
+const clearAllUsers = () => {
+  userMap = {};
 };
 
-module.exports = { getUser, addCard };
+module.exports = {
+  getUser,
+  clearAllUsers,
+};
