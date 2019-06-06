@@ -80,7 +80,8 @@ class User {
   }
 
   putCard(_card) {
-    const captchaCard = makeCaptcha(_card);
+    // const captchaCard = makeCaptcha(_card);
+    const captchaCard = _card;
     this.inv.putCard(captchaCard);
   }
 

@@ -4,13 +4,13 @@
   "main": "bot.js",
   "author": "Daniel Timko",
   "scripts": {
-    "pretest": "eslint ./bot/*.js ./test/*.js --fix",
     "test": "mocha",
     "start": "node ./bot/bot.js",
     "dev": "nodemon ./bot/bot.js"
   },
   "dependencies": {
-    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6"
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "randomstring": "^1.1.5"
   },
   "devDependencies": {
     "chai": "^4.2.0",
