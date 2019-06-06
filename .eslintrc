@@ -8,6 +8,7 @@
   "rules": {
     "mocha/no-exclusive-tests": "error",
     "no-underscore-dangle": "off",
-    "no-plusplus": "off"
+    "no-plusplus": "off",
+    "no-unused-expressions": "off"
   }
 }

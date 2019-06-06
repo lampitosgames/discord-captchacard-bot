@@ -9,8 +9,7 @@
     "dev": "nodemon ./bot/bot.js"
   },
   "dependencies": {
-    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
-    "randomstring": "^1.1.5"
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6"
   },
   "devDependencies": {
     "chai": "^4.2.0",

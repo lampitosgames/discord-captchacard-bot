@@ -5,7 +5,7 @@ const {
   getNewCaptcha,
   makeCaptcha,
   title,
-  captcha
+  captcha,
 } = require('../bot/captcha.js');
 
 describe('Captcha generation', () => {
@@ -13,7 +13,7 @@ describe('Captcha generation', () => {
     ensureLoadedCharacters();
   });
 
-  describe("hasCaptcha", () => {
+  describe('hasCaptcha', () => {
     it('should return false when a card doesn\'t have a captcha', () => {
       hasCaptcha('test card without captcha').should.be.false;
     });
@@ -21,14 +21,14 @@ describe('Captcha generation', () => {
       hasCaptcha('test card with captcha-jnslfe28s0').should.be.true;
     });
     it('should not fail when passed arbitrary data', () => {
-      hasCaptcha({ test: "" }).should.be.false;
+      hasCaptcha({ test: '' }).should.be.false;
     });
     it('should fail when the captcha has a space', () => {
-      hasCaptcha("test card-aaa bbbccc").should.be.false;
-    })
+      hasCaptcha('test card-aaa bbbccc').should.be.false;
+    });
     it('should properly detect captcha when the card name has a - character', () => {
-      hasCaptcha("Testing-the cool stuff-aaabbbcccd").should.be.true;
-    })
+      hasCaptcha('Testing-the cool stuff-aaabbbcccd').should.be.true;
+    });
   });
 
   describe('getNewCaptcha', () => {
