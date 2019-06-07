@@ -3,6 +3,9 @@
 # auth data
 auth.json
 
+# user data
+/user-data
+
 # dependencies
 /node_modules
 /.pnp

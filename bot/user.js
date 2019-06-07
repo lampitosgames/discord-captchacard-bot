@@ -27,7 +27,9 @@ class ArrayInventory {
   }
 
   takeCard(_card) {
-    const [removedCard] = this.data.splice(this.data.indexOf(_card), 1);
+    const cardInd = this.data.indexOf(_card);
+    if (cardInd === -1) return false;
+    const [removedCard] = this.data.splice(cardInd, 1);
     if (removedCard) {
       return removedCard;
     }
