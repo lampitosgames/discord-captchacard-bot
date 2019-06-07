@@ -103,7 +103,12 @@ describe('User state management', () => {
       user.takeCard(1);
       user.takeCard("");
       user.inv.count.should.equal(5);
-    })
+    });
+
+    it('should do nothing if a card with the same title already exists in inventory', () => {
+      populateInventory(user);
+      user.putCard("card-one").should.be.false;
+    });
   });
 
   it('should have persistent user state and inventory', () => {
@@ -167,7 +172,7 @@ describe('User state management', () => {
 
     it('should properly hash cards and store them in the inventory', () => {
       let hashedIndex = testCardHashVal % user.inv.cardsInDeck;
-      user.cards[hashedIndex.toString()].should.equal("test card-aaabbbcccd");
+      user.cards.should.include.all.members(["test card-aaabbbcccd"]);
     });
 
     it('should access stored cards via hash rather than via title', () => {
@@ -177,7 +182,7 @@ describe('User state management', () => {
 
     it('should replace the existing card if a new one has the same hash', () => {
       let hashedIndex = (testCardHashVal % user.inv.cardsInDeck).toString();
-      user.cards[hashedIndex].should.equal('test card-aaabbbcccd');
+      user.inv.data[hashedIndex].should.equal('test card-aaabbbcccd');
       user.putCard('tent-card-aaabbbcccd');
       user.takeCard(hashedIndex).should.equal('tent-card-aaabbbcccd');
     });
@@ -219,15 +224,31 @@ describe('User state management', () => {
       });
 
       it('should not be able to remove a deep node with children', () => {
-
         user.takeCard('card-4-aaabbbcccd').should.be.false;
         user.takeCard('card-5-aaabbbcccd').should.be.false;
         user.takeCard('card-11-aaabbbcccd');
         user.takeCard('card-10-aaabbbcccd');
         user.takeCard('card-9-aaabbbcccd');
         user.takeCard('card-5-aaabbbcccd').should.equal('card-5-aaabbbcccd');
-      })
-    })
+      });
+
+      it('should insert new cards into the first valid slot', () => {
+        user.takeCard('card-6-aaabbbcccd');
+        user.takeCard('card-7-aaabbbcccd');
+        user.takeCard('card-8-aaabbbcccd');
+        user.takeCard('card-3-aaabbbcccd');
+        user.putCard('newly-inserted-card-aaabbbcccd');
+        user.putCard('newly-inserted-card-2-aaabbbcccd');
+        user.putCard('newly-inserted-card-3-aaabbbcccd');
+        user.putCard('newly-inserted-card-4-aaabbbcccd');
+        user.putCard('newly-inserted-card-5-aaabbbcccd');
+        user.cards[3].should.equal('newly-inserted-card-aaabbbcccd');
+        user.cards[6].should.equal('newly-inserted-card-2-aaabbbcccd');
+        user.cards[7].should.equal('newly-inserted-card-3-aaabbbcccd');
+        user.cards[8].should.equal('newly-inserted-card-4-aaabbbcccd');
+        user.cards[12].should.equal('newly-inserted-card-5-aaabbbcccd');
+      });
+    });
   });
 });
 //"pretest": "eslint ./bot/*.js ./test/*.js --fix",

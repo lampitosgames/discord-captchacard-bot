@@ -6,13 +6,12 @@ const captchaReg = /-[^\s]{10}$/;
 let characterList = '';
 
 const ensureLoadedCharacters = () => {
-  if (characterList.length > 0) return;
-  fs.readFile(path.join(__dirname, './characters.txt'), 'utf8', (err, contents) => {
-    contents.normalize().split('\n').forEach((line) => {
-      line.split(' ').forEach((char) => {
-        char.split('').forEach((c) => {
-          characterList += c;
-        });
+  if (characterList.length > 0) return new Promise((resolve, reject) => resolve());
+  let contents = fs.readFileSync(path.join(__dirname, './characters.txt'), 'utf8');
+  contents.normalize().split('\n').forEach((line) => {
+    line.split(' ').forEach((char) => {
+      char.split('').forEach((c) => {
+        characterList += c;
       });
     });
   });
@@ -40,7 +39,7 @@ const makeCaptcha = (_card) => {
   if (hasCaptcha(_card)) {
     return _card;
   }
-  const cardWithCaptcha = `${_card}-${getNewCaptcha()}`;
+  const cardWithCaptcha = _card + "-" + getNewCaptcha();
   return cardWithCaptcha;
 };
 

@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const invTypes = require('./inv-types.js');
 const captcha = require('./captcha.js');
 
@@ -12,6 +14,14 @@ class ArrayInventory {
     return this.data.length;
   }
 
+  get cards() {
+    return this.data;
+  }
+
+  get json() {
+    return this.data;
+  }
+
   putCard(_card) {
     this.data.push(_card);
   }
@@ -22,6 +32,10 @@ class ArrayInventory {
       return removedCard;
     }
     return false;
+  }
+
+  load(_data) {
+    this.data = _data;
   }
 }
 
@@ -64,6 +78,17 @@ class TreeInventory extends ArrayInventory {
     return this.nodeCount;
   }
 
+  get cards() {
+    return this.data.filter((c) => c !== 0);
+  }
+
+  get json() {
+    return {
+      data: this.data,
+      nodeCount: this.nodeCount
+    };
+  }
+
   nodeLeftChild(_i) {
     if (2 * _i + 1 < this.data.length) {
       return 2 * _i + 1;
@@ -98,7 +123,7 @@ class TreeInventory extends ArrayInventory {
       this.data.push(_card);
       return;
     }
-    data[nextEmptyLeaf] = _card;
+    this.data[nextEmptyLeaf] = _card;
   }
 
   takeCard(_card) {
@@ -109,6 +134,11 @@ class TreeInventory extends ArrayInventory {
     this.data[ind] = 0;
     this.nodeCount -= 1;
     return pulledCard;
+  }
+
+  load(_data) {
+    this.data = _data.data;
+    this.nodeCount = _data.nodeCount;
   }
 }
 
@@ -121,6 +151,10 @@ class HashmapInventory extends ArrayInventory {
 
   get count() {
     return Object.keys(this.data).length;
+  }
+
+  get cards() {
+    return Object.values(this.data);
   }
 
   hashCardTitle(_title) {
@@ -166,15 +200,30 @@ class User {
   }
 
   get cards() {
-    return this.inv.data;
+    return this.inv.cards;
+  }
+
+  get json() {
+    let writeObject = {
+      id: this.id,
+      modus: this.modus,
+      data: this.inv.json
+    }
+    return JSON.stringify(writeObject);
   }
 
   putCard(_card) {
     if (typeof _card !== 'string') return false;
     if (_card === "") return false;
+    let isADuplicate = false;
+    this.cards.forEach((card) => {
+      if (isADuplicate) return;
+      isADuplicate = captcha.title(card) === captcha.title(_card);
+    });
+    if (isADuplicate) return false;
     const captchaCard = captcha.makeCaptcha(_card);
     this.inv.putCard(captchaCard);
-    return true;
+    return captchaCard;
   }
 
   takeCard(_card) {
@@ -210,7 +259,18 @@ class User {
       break;
     }
     this.clearInventory();
-    return true;
+    return _newModus;
+  }
+
+  static load(_userData) {
+    let newUser = new User(_userData.id);
+    newUser.changeModus(_userData.modus);
+    newUser.inv.load(_userData.data);
+    return newUser;
+  }
+
+  save() {
+    fs.writeFileSync(path.join(__dirname, '../user-data', `${this.id}.json`), this.json);
   }
 }
 
@@ -221,6 +281,18 @@ const getUser = (_userID) => {
   return userMap[_userID];
 };
 
+const loadUserFromJson = (_userJSON) => {
+  let userData = JSON.parse(_userJSON);
+  userMap[userData.id] = User.load(userData);
+}
+
+const loadAllUsers = () => {
+  fs.readdirSync(path.join(__dirname, '../user-data')).forEach(file => {
+    let json = fs.readFileSync(path.join(__dirname, '../user-data', file));
+    loadUserFromJson(json);
+  });
+}
+
 const clearAllUsers = () => {
   userMap = {};
 };
@@ -229,4 +301,4 @@ const getUserMap = () => {
   return userMap;
 }
 
-module.exports = { User, getUser, clearAllUsers, getUserMap };
+module.exports = { User, getUser, loadAllUsers, clearAllUsers, getUserMap };
