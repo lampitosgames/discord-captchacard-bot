@@ -1,8 +1,10 @@
-require('chai').should();
+const should = require('chai').should();
+const expect = require('chai').expect;
 const {
   getUser,
   clearAllUsers,
-} = require('../bot/user-inventory.js');
+  getUserMap
+} = require('../bot/user.js');
 const invTypes = require('../bot/inv-types.js');
 
 const populateInventory = (_user) => {
@@ -28,11 +30,27 @@ describe('User state management', () => {
       user.should.not.equal(null);
     });
 
+    it('should not create a new user if the same user is fetched twice', () => {
+      user = getUser('new-user');
+      user.putCard("test-card-time-aaabbbcccd");
+      user = getUser('new-user');
+      user.cards.should.include.all.members(["test-card-time-aaabbbcccd"]);
+    });
+
     it('should set ARRAY as the default data type for a user', () => {
       user = getUser('new-user');
       user.modus.should.equal(invTypes.ARRAY);
     });
   });
+
+  describe("clearAllUsers", () => {
+    it('should reset the user map so that getUserMap returns an empty object', () => {
+      user = getUser('new-user-1');
+      getUserMap()['new-user-1'].should.not.be.null;
+      clearAllUsers();
+      expect(getUserMap()['new-user-1']).to.be.undefined;
+    })
+  })
 
   describe('adding and removing cards', () => {
     it('should properly add a card to a user\'s inventory', () => {
@@ -167,11 +185,49 @@ describe('User state management', () => {
     it('should return false if user asks for invalid index or a card name', () => {
       user.takeCard('8').should.be.false;
       user.takeCard('asdfasdf').should.be.false;
+      user.takeCard('').should.be.false;
     });
   });
 
   describe('tree mode inventory', () => {
+    beforeEach((done) => {
+      user.changeModus("tree");
+      done();
+    });
 
-  })
+    it('should construct a tree with nodes that cannot be removed', () => {
+      user.putCard('card-1-aaabbbcccd');
+      user.putCard('card-2-aaabbbcccd');
+      user.takeCard('card-1-aaabbbcccd').should.be.false;
+    });
+
+    it('should be able to remove nodes with no children', () => {
+      user.putCard('card-1-aaabbbcccd');
+      user.putCard('card-2-aaabbbcccd');
+      user.putCard('card-3-aaabbbcccd');
+      user.takeCard('card-2-aaabbbcccd').should.equal('card-2-aaabbbcccd');
+      user.takeCard('card-3-aaabbbcccd').should.equal('card-3-aaabbbcccd');
+      user.takeCard('card-1-aaabbbcccd').should.equal('card-1-aaabbbcccd');
+    });
+
+    describe('larger tree testing', () => {
+      beforeEach((done) => {
+        for (let j = 0; j < 12; j++) {
+          user.putCard(`card-${j}-aaabbbcccd`);
+        }
+        done();
+      });
+
+      it('should not be able to remove a deep node with children', () => {
+
+        user.takeCard('card-4-aaabbbcccd').should.be.false;
+        user.takeCard('card-5-aaabbbcccd').should.be.false;
+        user.takeCard('card-11-aaabbbcccd');
+        user.takeCard('card-10-aaabbbcccd');
+        user.takeCard('card-9-aaabbbcccd');
+        user.takeCard('card-5-aaabbbcccd').should.equal('card-5-aaabbbcccd');
+      })
+    })
+  });
 });
 //"pretest": "eslint ./bot/*.js ./test/*.js --fix",

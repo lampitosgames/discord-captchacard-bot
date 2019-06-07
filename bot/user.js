@@ -1,6 +1,8 @@
 const invTypes = require('./inv-types.js');
 const captcha = require('./captcha.js');
 
+let userMap = {};
+
 class ArrayInventory {
   constructor() {
     this.data = [];
@@ -78,9 +80,13 @@ class TreeInventory extends ArrayInventory {
   }
 
   canBePulled(_ind) {
-    let leftI = this.nodeLeftChild(_ind);
-    let rightI = this.nodeRightChild(_ind);
-    if ((leftI || rightI) && (this.data[leftI] !== 0 || this.data[rightI] !== 0)) {
+    let leftI = this.nodeLeftChild(_ind); //11
+    let rightI = this.nodeRightChild(_ind); //false
+
+    if (leftI !== false && this.data[leftI] !== 0) {
+      return false;
+    }
+    if (rightI !== false && this.data[rightI] !== 0) {
       return false;
     }
     return true;
@@ -90,6 +96,7 @@ class TreeInventory extends ArrayInventory {
     let nextEmptyLeaf = this.data.indexOf(0);
     if (nextEmptyLeaf === -1) {
       this.data.push(_card);
+      return;
     }
     data[nextEmptyLeaf] = _card;
   }
@@ -207,4 +214,19 @@ class User {
   }
 }
 
-module.exports = User;
+const getUser = (_userID) => {
+  if (!Object.keys(userMap).includes(_userID)) {
+    userMap[_userID] = new User(_userID);
+  }
+  return userMap[_userID];
+};
+
+const clearAllUsers = () => {
+  userMap = {};
+};
+
+const getUserMap = () => {
+  return userMap;
+}
+
+module.exports = { User, getUser, clearAllUsers, getUserMap };
